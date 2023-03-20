@@ -15,12 +15,15 @@ struct Suite {
     constexpr Suite() = default;
     constexpr Suite(const std::string& name) : name{name} {};
 
-    constexpr void addTest(TestFunc auto func) {
+    constexpr auto addTest(TestFunc auto func) {
         constexpr TestResult ctResult = func();
         results.push_back(ctResult);
 
-        TestResult runTimeResult = func();
-        results.back().msg = runTimeResult.msg;
+        if (std::is_constant_evaluated() == false) {
+            TestResult runTimeResult = func();
+            messages.push_back(cttest::format(runTimeResult));
+        }
+        return ctResult;
     }
 
     void summary() const {
@@ -31,8 +34,9 @@ struct Suite {
             fmt::print("No tests defined.\n");
             return;
         }
-        for (const auto & res : results) {
-            print(res);
+
+        for (const auto& res: messages) {
+            fmt::print("{}\n", res);
         }
     }
     constexpr bool passed() const {
@@ -42,6 +46,7 @@ struct Suite {
     constexpr bool failed() const { return !passed(); }
 
     std::vector<TestResult> results;
+    std::vector<std::string> messages;
     std::string name{"Anonymous"};
 };
 

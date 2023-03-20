@@ -3,6 +3,7 @@
 #include "testresult.h"
 #include "attributes.h"
 #include "concepts.h"
+#include "suite.h"
 
 #include <fmt/core.h>
 #include <fmt/ranges.h>
@@ -20,15 +21,6 @@
 namespace cttest
 {
 
-constexpr void writeMsg(const std::string& msg, auto iter) {
-    const auto limit = TestResult::MAX_MSG_LEN;
-    if (msg.length() <= limit) {
-        fmt::format_to(iter, "{}", msg);
-    }
-    else {
-        fmt::format_to(iter,"Msg length ({}) is too long (limit is {})", msg.length(), limit);
-    }
-}
 
 template <typename T, typename Func>
 constexpr TestResult expectUnaryOp(const T& a, Func op,
@@ -43,19 +35,11 @@ constexpr TestResult expectUnaryOp(const T& a, Func op,
     if constexpr (fmt::is_formattable<T>()) {
 
         if constexpr (hasUnaryOpMsg<Func, T>) {
-            std::string msg = op.msg(a, res);
-            writeMsg(msg, res.msg.begin());
-        }
-        else {
-            res.msg = {"No message defined"};
+            res.optMsg = op.msg(a, res);
         }
     }
     else if constexpr (hasUnaryOpMsg<Func, std::string>) {
-            std::string msg = op.msg("$a", res);
-            writeMsg(msg, res.msg.begin());
-    }
-    else {
-        res.msg = {"No message defined"};
+            res.optMsg = op.msg("$a", res);
     }
 
     return res;
@@ -74,19 +58,11 @@ constexpr TestResult expectBinOp(const T& a, Func op, const U& b,
     if constexpr (fmt::is_formattable<T>()) {
 
         if constexpr (hasBinOpMsg<Func, T>) {
-            std::string msg = op.msg(a, b, res);
-            writeMsg(msg, res.msg.begin());
-        }
-        else {
-            res.msg = {"No message defined"};
+            res.optMsg = op.msg(a, b, res);
         }
     }
     else if constexpr (hasBinOpMsg<Func, std::string>) {
-            std::string msg = op.msg("$a", "$b", res);
-            writeMsg(msg, res.msg.begin());
-    }
-    else {
-        res.msg = {"No message defined"};
+            res.optMsg = op.msg("$a", "$b", res);
     }
     return res;
 }
@@ -172,19 +148,16 @@ constexpr bool testAtCompileTime(auto func) {
     return compileTimeResult.passed();
 }
 
-bool testAtRunTime(auto func) {
+bool testAtRunTime(TestFunc auto func) {
 
     const TestResult runTimeResult = func();
-    print(runTimeResult);
+    fmt::print("{}\n", cttest::format(runTimeResult));
     return runTimeResult.passed();
 }
 
-bool test(auto func) {
+bool test(TestFunc auto func) {
     static constexpr bool ctResult = testAtCompileTime(func);
     return testAtRunTime(func) && ctResult;
 }
 
-
 } // namespace cttest
-
-#include "suite.h"

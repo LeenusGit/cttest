@@ -9,3 +9,14 @@ basic = executable('basic',
 )
 
 test('basic', basic)
+
+suite = executable('suite',
+    # cpp_args: ['-O0', '-fkeep-inline-functions'],
+    sources: files(
+        'suite.cpp',
+        'suite2.cpp',
+    ),
+    dependencies: test_deps
+)
+
+test('suite', suite)

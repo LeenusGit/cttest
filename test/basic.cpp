@@ -37,7 +37,7 @@ template bool cttest::testAtCompileTime(decltype(func));
 template bool cttest::testAtRunTime(decltype(func));
 template bool cttest::test(decltype(func));
 
-template void cttest::Suite::addTest(decltype(func));
+template auto cttest::Suite::addTest(decltype(func));
 
 template TestResult cttest::expect(const bool&, cttest::True, std::source_location);
 template TestResult cttest::expectTrue(const bool&, std::source_location);
@@ -69,16 +69,7 @@ struct fmt::formatter<TestType> {
     template <typename FormatContext>
     auto format(const TestType& tmp, FormatContext& ctx) const {
         auto res = ctx.out();
-        if (tmp.value == 42) {
-            // Write too long format
-            int count = 20;
-            while (count--) {
-                res = fmt::format_to(ctx.out(), "TestType({})", tmp.value);
-            }
-        }
-        else {
-            res = fmt::format_to(ctx.out(), "TestType({})", tmp.value);
-        }
+        res = fmt::format_to(ctx.out(), "TestType({})", tmp.value);
         return res;
     }
 };
