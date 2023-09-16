@@ -11,14 +11,40 @@
 namespace cttest
 {
 
+// template <typename F, typename T>
+// concept hasUnaryOpMsg = requires (F op, const T& a) {
+//     { op.msg(a) } -> std::convertible_to<std::string>;
+// };
+
 struct TestResult {
 
     constexpr TestResult () = default;
     constexpr TestResult (bool passed, std::source_location location) :
         _location{location},
         _ok{passed}
+    { }
+
+    template <typename T, typename Func>
+    constexpr TestResult (const T& a, Func op,
+    const std::source_location location = std::source_location::current()) :
+        _location{location},
+        _ok{op(a)}
     {
+        if (std::is_constant_evaluated()) { return; }
+        
+        // Create debug message at run time
+
+        // if constexpr (fmt::is_formattable<T>()) {
+
+        //     if constexpr (hasUnaryOpMsg<Func, T>) {
+        //         optMsg = op.msg(a, *this);
+        //     }
+        // }
+        // else if constexpr (hasUnaryOpMsg<Func, std::string>) {
+        //         optMsg = op.msg("$a", *this);
+        // }
     }
+
     constexpr bool passed() const { return _ok; }
     constexpr bool failed() const { return !passed(); }
 

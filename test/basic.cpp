@@ -27,10 +27,10 @@ template TestResult cttest::expectUnaryOp(const bool&, NoMsg, std::source_locati
 template TestResult cttest::expectUnaryOp(const Nonformattable&, MsgNonFormattable, std::source_location);
 template TestResult cttest::expectUnaryOp(const Nonformattable&, NoMsg, std::source_location);
 
-template TestResult cttest::expectBinOp(const bool&, cttest::Equality, const bool&, std::source_location);
-template TestResult cttest::expectBinOp(const bool&, NoMsg, const bool&, std::source_location);
-template TestResult cttest::expectBinOp(const Nonformattable&, cttest::Equality, const Nonformattable&, std::source_location);
-template TestResult cttest::expectBinOp(const Nonformattable&, NoMsg, const Nonformattable&, std::source_location);
+// template TestResult cttest::expectBinOp(const bool&, cttest::Equality, const bool&, std::source_location);
+// template TestResult cttest::expectBinOp(const bool&, NoMsg, const bool&, std::source_location);
+// template TestResult cttest::expectBinOp(const Nonformattable&, cttest::Equality, const Nonformattable&, std::source_location);
+// template TestResult cttest::expectBinOp(const Nonformattable&, NoMsg, const Nonformattable&, std::source_location);
 
 auto func = [] { return TestResult{}; };
 template bool cttest::testAtCompileTime(decltype(func));
@@ -42,14 +42,14 @@ template auto cttest::Suite::addTest(decltype(func));
 template TestResult cttest::expect(const bool&, cttest::True, std::source_location);
 template TestResult cttest::expectTrue(const bool&, std::source_location);
 
-template TestResult cttest::expect(const bool&, cttest::Equality, const bool&, std::source_location);
-template TestResult cttest::expectFalse(const bool&, std::source_location);
-template TestResult cttest::expectEq(const bool&, const bool&, std::source_location);
-template TestResult cttest::expectNe(const bool&, const bool&, std::source_location);
-template TestResult cttest::expectLt(const bool&, const bool&, std::source_location);
-template TestResult cttest::expectLe(const bool&, const bool&, std::source_location);
-template TestResult cttest::expectGt(const bool&, const bool&, std::source_location);
-template TestResult cttest::expectGe(const bool&, const bool&, std::source_location);
+// template TestResult cttest::expect(const bool&, cttest::Equality, const bool&, std::source_location);
+// template TestResult cttest::expectFalse(const bool&, std::source_location);
+// template TestResult cttest::expectEq(const bool&, const bool&, std::source_location);
+// template TestResult cttest::expectNe(const bool&, const bool&, std::source_location);
+// template TestResult cttest::expectLt(const bool&, const bool&, std::source_location);
+// template TestResult cttest::expectLe(const bool&, const bool&, std::source_location);
+// template TestResult cttest::expectGt(const bool&, const bool&, std::source_location);
+// template TestResult cttest::expectGe(const bool&, const bool&, std::source_location);
 
 constexpr auto createEmptySuite = []{
     Suite suite{};
@@ -83,16 +83,16 @@ constexpr auto passingTests = []{
     suite.addTest([]{
         TestType a{1};
         TestType b{1};
-        return expectEq(a, b);
+        return equal_to(a, b);
     });
     suite.addTest([]{
         TestType a{1};
         TestType b{2};
-        return expectNe(a, b);
+        return not_equal_to(a, b);
     });
     suite.addTest([]{
         TestType a{42};
-        return expectEq(a, TestType{42});
+        return equal_to(a, TestType{42});
     });
     return suite;
 };
@@ -139,13 +139,13 @@ constexpr auto unaryFormatTest = []{
 constexpr auto binaryFormatTests = []{
     Suite suite{"binaryFormatTests"};
     suite.addTest([]{
-        return expectEq(TestType{1}, TestType{1});
+        return cttest::equal_to(TestType{1}, TestType{1});
     });
     suite.addTest([]{
         return expect(TestType{1}, TrueNoMsg{}, TestType{1});
     });
     suite.addTest([]{
-        return expect(Nonformattable{1}, Equality{}, Nonformattable{1});
+        return expect(Nonformattable{1}, std::equal_to<>{}, Nonformattable{1});
     });
     suite.addTest([]{
         return expect(Nonformattable{1}, TrueNoMsg{}, Nonformattable{1});
@@ -156,55 +156,55 @@ constexpr auto binaryFormatTests = []{
 constexpr auto helperFunctionTests = []{
     Suite suite{"helperFunctionTests"};
     suite.addTest([]{
-        return expectLt(TestType{1}, TestType{2});
+        return less(TestType{1}, TestType{2});
     });
     suite.addTest([]{
-        return expectLe(TestType{2}, TestType{2});
+        return less(TestType{2}, TestType{2});
     });
     suite.addTest([]{
-        return expectGt(TestType{2}, TestType{1});
+        return greater(TestType{2}, TestType{1});
     });
     suite.addTest([]{
-        return expectGe(TestType{2}, TestType{2});
+        return greater_equal(TestType{2}, TestType{2});
     });
     return suite;
 };
 
 int main() {
 
-    createEmptySuite().summary();
-    fmt::print("---\n");
-    passingTests().summary();
-    fmt::print("---\n");
-    failingTests().summary();
-    fmt::print("---\n");
-    unaryFormatTest().summary();
-    fmt::print("---\n");
-    binaryFormatTests().summary();
-    fmt::print("---\n");
-    helperFunctionTests().summary();
-    fmt::print("---\n");
+    // createEmptySuite().print();
+    // fmt::print("---\n");
+    // passingTests().print();
+    // fmt::print("---\n");
+    // failingTests().print();
+    // fmt::print("---\n");
+    // unaryFormatTest().print();
+    // fmt::print("---\n");
+    // binaryFormatTests().print();
+    // fmt::print("---\n");
+    // helperFunctionTests().print();
+    // fmt::print("---\n");
     
     constexpr std::array results {
-        createEmptySuite().passed(),
-        passingTests().passed(),
+        createEmptySuite().run(),
+        passingTests().run(),
         failingTests().failed(),
-        unaryFormatTest().passed(),
-        binaryFormatTests().passed(),
-        helperFunctionTests().passed(),
+        unaryFormatTest().run(),
+        binaryFormatTests().run(),
+        helperFunctionTests().run(),
     };
     constexpr bool cxPassed = std::ranges::find(results, false) == results.end();
     static_assert(cxPassed);
 
     std::vector<bool> runtimeResults {
-        passingTests().passed(),
+        passingTests().run(),
         failingTests().failed(),
-        testAtCompileTime([]{ return expectEq(TestType{1}, TestType{1}); }),
-        test([]{ return expectEq(TestType{1}, TestType{1}); }),
-        []{ return expectEq(TestType{1}, TestType{2}); }().failed(),
+        testAtCompileTime([]{ return equal_to(TestType{1}, TestType{1}); }),
+        test([]{ return equal_to(TestType{1}, TestType{1}); }),
+        []{ return equal_to(TestType{1}, TestType{2}); }().failed(),
     };
 
-    runtimeResults.push_back(testAtCompileTime([]{ return expectEq(TestType{1}, TestType{1}); }));
+    runtimeResults.push_back(testAtCompileTime([]{ return equal_to(TestType{1}, TestType{1}); }));
     runtimeResults.push_back(TestResult{}.failed());
     bool rtPassed = std::ranges::find(runtimeResults, false) == runtimeResults.end();
 

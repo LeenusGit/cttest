@@ -6,6 +6,7 @@
 #include <fmt/core.h>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 namespace cttest
 {
@@ -22,11 +23,21 @@ struct Suite {
         if (std::is_constant_evaluated() == false) {
             TestResult runTimeResult = func();
             messages.push_back(cttest::format(runTimeResult));
+            // fmt::print("{}\n", cttest::format(runTimeResult));
         }
         return ctResult;
     }
 
-    void summary() const {
+    constexpr auto add(const TestResult& res) {
+        results.push_back(res);
+
+        if (std::is_constant_evaluated() == false) {
+            messages.push_back(cttest::format(res));
+        }
+        return res;
+    }
+
+    void print() const {
 
         fmt::print("{}:\n", name);
 
@@ -39,15 +50,21 @@ struct Suite {
             fmt::print("{}\n", res);
         }
     }
-    constexpr bool passed() const {
-        auto pred = [](const TestResult& res) { return res.passed(); };
+
+    constexpr bool run(bool verbose = true) const {
+        if (not std::is_constant_evaluated() && verbose) {
+            print();
+        }
+        auto pred = [&](const TestResult& res) { 
+            return res.passed(); 
+        };
         return std::ranges::all_of(results, pred);
     }
-    constexpr bool failed() const { return !passed(); }
+    constexpr bool failed() const { return !run(); }
 
-    std::vector<TestResult> results;
-    std::vector<std::string> messages;
+    std::vector<TestResult> results{};
+    std::vector<std::string> messages{};
     std::string name{"Anonymous"};
 };
 
-}
+} // ns
