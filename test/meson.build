@@ -24,3 +24,5 @@ suite = executable('suite',
 )
 
 test('suite', suite)
+
+subdir('containers')
