@@ -33,8 +33,9 @@ test(
         'ut_simple',
         sources: 'ut_simple.cpp',
         dependencies: [
-            dependency('fmt')
+            dependency('fmt'),
+            dependency('cttest'),
         ],
-        # cpp_args: ['-DDEBUG']
+        # cpp_args: ['-DCTT_DEBUG']
     )
 )
