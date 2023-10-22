@@ -14,8 +14,7 @@ test(
         'ut_staticvector',
         sources: 'ut_staticvector.cpp',
         dependencies: [
-            test_deps,
-            dependency('libawful')
+            test_deps
         ],
         cpp_args: ['-fconcepts-diagnostics-depth=2']
     )
